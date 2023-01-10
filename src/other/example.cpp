@@ -152,14 +152,29 @@ void main() {
 	stokes->offset = new float[n_fits];
 	stokes->sanity = new int[n_fits];
 
-	/* Start of DLL_wrapper test */
-	printf("\n=====\n Starting DLL wrapper test... \n===== \n");
-	DLL_wrapper::pipeline_initialisation(dim.width, dim.height, &fitting_context, &cec, FIT_LORENTZIAN, FIT_LORENTZIAN, FIT_LORENTZIAN, stokes_range, rayleigh_range, antistokes_range, &angle_context);
-	DLL_wrapper::pipeline_send_experiment_settings(peak_numbers, original_peak_positions, translation_lut, frq_lut, start_ROI, end_ROI);
-	//DLL_wrapper::pipeline_set_constraints(true, 0.1, 3, 1, 0.1, 5);
-	DLL_wrapper::pipeline_sum_and_fit(synthetic_data, true, stokes, rayleigh, antistokes); //Call this function once for each image to process
-	//DLL_wrapper::pipeline_get_gof(stokes_gof, rayleigh_gof, antistokes_gof);
-	DLL_wrapper::pipeline_close();
+  // Allocation memory to retrieve fitting results in arrays (= Labview)
+  float* antistokes_array = new float[n_fits * 4];
+  float* rayleigh_array = new float[n_fits * 4];
+  float* stokes_array = new float[n_fits * 4];
+
+  /* Start of DLL_wrapper test */
+  printf("\n=====\n Starting DLL wrapper test... \n===== \n");
+  DLL_wrapper::pipeline_initialisation(
+      dim.width, dim.height, &fitting_context, &cec, FIT_LORENTZIAN,
+      FIT_LORENTZIAN, FIT_LORENTZIAN, stokes_range, rayleigh_range,
+      antistokes_range, &angle_context);
+  DLL_wrapper::pipeline_send_experiment_settings(
+      peak_numbers, original_peak_positions, translation_lut, frq_lut,
+      start_ROI, end_ROI);
+  // DLL_wrapper::pipeline_set_constraints(true, 0.1, 3, 1, 0.1, 5);
+  DLL_wrapper::pipeline_sum_and_fit(
+      synthetic_data, true, stokes, rayleigh,
+      antistokes);  // Call this function once for each image to process
+  DLL_wrapper::pipeline_sum_and_fit_to_array(
+      synthetic_data, true, stokes_array, rayleigh_array,
+      antistokes_array);  
+  // DLL_wrapper::pipeline_get_gof(stokes_gof, rayleigh_gof, antistokes_gof);
+  DLL_wrapper::pipeline_close();
 
 	//Display result of the fit
 	for (int i = 0; i < n_fits; i++) {
@@ -172,6 +187,35 @@ void main() {
 			syn_antistokes_center, antistokes->shift[i], abs(syn_antistokes_center - antistokes->shift[i]) * 1000);
 
 	}
+
+	// Comparing pipeline_sum_and_fit and pipeline_sum_and_fit_to_array
+        printf(
+            "## pipeline_sum_and_fit_to_array vs pipeline_sum_and_fit ## "
+            "\n\r"
+            "type \t |Shift \t| Amplitude \t| Width \t| Offset \n\r");
+        for (int i = 0; i < n_fits; i++) {
+          printf("stokes \t\t");
+          printf("%f\t", stokes->shift[i] - stokes_array[4 * i + 1]);
+          printf("%f\t", stokes->amplitude[i] - stokes_array[4 * i + 0]);
+          printf("%f\t", stokes->width[i] - stokes_array[4 * i + 2]);
+          printf("%f\t", stokes->offset[i] - stokes_array[4 * i + 3]);
+          printf("\n\r");
+
+          printf("Rayleigh \t");
+          printf("%f\t", rayleigh->shift[i] - rayleigh_array[4 * i + 1]);
+          printf("%f\t", rayleigh->amplitude[i] - rayleigh_array[4 * i + 0]);
+          printf("%f\t", rayleigh->width[i] - rayleigh_array[4 * i + 2]);
+          printf("%f\t", rayleigh->offset[i] - rayleigh_array[4 * i + 3]);
+          printf("\n\r");
+
+          printf("antistokes \t");
+          printf("%f\t", antistokes->shift[i] - antistokes_array[4 * i + 1]);
+          printf("%f\t",
+                 antistokes->amplitude[i] - antistokes_array[4 * i + 0]);
+          printf("%f\t", antistokes->width[i] - antistokes_array[4 * i + 2]);
+          printf("%f\t", antistokes->offset[i] - antistokes_array[4 * i + 3]);
+          printf("\n\r");
+        }
 
 
 	// ====
@@ -315,6 +359,10 @@ void main() {
 	delete[] stokes->offset;
 	delete[] stokes->sanity;
 	delete stokes ;
+
+	delete[] antistokes_array;
+    delete[] rayleigh_array;
+	delete[] stokes_array;
 
 	delete[] standalone_a;
 	delete[] standalone_b;
