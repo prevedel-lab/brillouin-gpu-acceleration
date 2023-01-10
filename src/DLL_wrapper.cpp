@@ -17,11 +17,11 @@ namespace DLL_wrapper {
 		 *		If there are < 2, no summation will be done on this column. dim : image.width
 		 *   \param[in] original_peak_positions A 2D array containing the position in the image of the rayleigh peaks
 		 *		detected in the columns. The positions are given in the pixel of the image, without linearisation.
-		 *		dimension : image.width * cec.max_n_peaks
+		 *		dimension : cec.max_n_peaks * image.width 
 		 *   \param[in] remapped_peak_positions A 2D array containing the position in the image of the rayleigh peaks
 		 *		detected in the columns. The positions are given in the linearized pixelspace of the image,
 		 *		i.e the target location of each rayleigh peak.
-		 *		dimension : image.width * cec.max_n_peaks
+		 *		dimension : cec.max_n_peaks * image.width 
 		 *   \param[out] a 1D array containing the first coefficient for the linearization of pixel of the column. dimension : image.width
 		 *   \param[out] b 1D array containing the second coefficient for the linearization of pixel of the column. dimension : image.width
 		 *   \param[out] c 1D array containing the third coefficient for the linearization of pixel of the column. dimension : image.width
@@ -54,7 +54,7 @@ namespace DLL_wrapper {
 		 *		If there are <2, no summation will be done on this column. dim : Image.width
 		 *  \param[in] original_peak_positions A 2D array containing the position in the image of the rayleigh peaks
 		 *		detected in the columns. The position is given in the pixel of the image, without linearisation.
-		 *		dimension : image.width * cec.max_n_peaks
+		 *		dimension : cec.max_n_peaks * image.width 
 		 *  \param[in] a 1D array containing the first coefficient for the linearization of pixel of the column. dimension : image.width
 		 *		(a*x*x + b*x + c)
 		 *  \param[in] b 1D array containing the second coefficient for the linearization of pixel of the column. dimension : image.width
@@ -127,7 +127,7 @@ namespace DLL_wrapper {
 		 *		If there are < 2, no summation will be done on this column. dim : image.width
 		 *   \param[in] original_peak_positions A 2D array containing the position in the image of the rayleigh peaks
 		 *		detected in the columns. The positions are given in the pixel of the image, without linearisation.
-		 *		dimension : image.width * cec.max_n_peaks
+		 *		dimension : cec.max_n_peaks * image.width 
 		 *   \param[in] a 1D array containing the first coefficient for the linearization of pixel of the column. dimension : image.width
 		 *		(a*x*x + b*x + c)
 		 *   \param[in] b 1D array containing the second coefficient for the linearization of pixel of the column. dimension : image.width
