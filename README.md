@@ -25,7 +25,7 @@ you can start processing Brillouin images quickly ! However, it's likely not goi
 some cuda version incompabilities. The safest way to compile this library is to start from the 
 Gpufit fork and to create the gpufit.dll on your PC. Then compile this library, and start the test to see if it works
 (you'll need to copy gpufit.dll in the same folder as GPUFitting.exe). If it works, create the GPUFitting.dll 
-and replace the .dll in Matlab/GPU_Fitting with the ones you just created. You should now be able to run the Matlab example !_
+and replace the .dll in Matlab/GPU_Fitting with the ones you just created. You should now be able to run the Matlab example !
 
 
 **0 Install and compile gpufit with the new function added. (optional)**
@@ -36,7 +36,7 @@ This [page](https://gpufit.readthedocs.io/en/latest/customization.html) explains
 - Use this [fork](https://github.com/prevedel-lab/Gpufit), already containing the additional functions.
 [This](https://gpufit.readthedocs.io/en/latest/installation.html#running-cmake-from-the-command-line)
  page from Gpufit's documentation explains how to compile it on windows with Visual Studio. 
-- Alternatively, you can also just use the precompiled gpufit.dll file from the "bin" folder.
+- Alternatively, you can also just use the precompiled gpufit.dll file from the "lib/gpufit" folder.
 
 **1 Install and compile this library**
 
