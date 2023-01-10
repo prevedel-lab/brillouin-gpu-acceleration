@@ -620,97 +620,187 @@ namespace DLL_wrapper {
 		Curve_Extraction_Context* curve_extraction_context;
 
 
-		/**
-		 * The main function to call. Once the gpu buffers are initialized and full,
-		 * you can call this to fit the stokes, rayleigh and antistokes peaks. You get the parameters for the functions
-		 * as a result. 
-		 * 
-		 * \param[in] cpu_raw_data The image which is going to be used as basis for the fitting. dimension : width*height
-		 * \param[in] dynamic_recentering Boolean to choose whether to automatically recenter the x-axis of the curve or not.  
-		 *		If *true*, the fitted center of the rayleigh peak is used to shift the stokes peak and the antistokes peak 
-		 *		(x -= rayleigh_x0). This is done before the data extraction, so it may affect the frequency range choosen. 
-		 *		If *false*, the x-axis of the peaks aren't changed. *For the moment, please use False*
-		 * \param[out] fitted_stokes A structure containing the fitted parameters for each fit of the Stokes peak.
-		 * \param[out] fitted_rayleigh A structure containing the fitted parameters for each fit of the Rayleigh peak.
-		 * \param[out] fitted_antistokes A structure containing the fitted parameters for each fit of the antiStokes peak.
-		 * 
-		 * \returns
-		 *	*fitted_stokes*, *fitted_rayleigh* and *fitted_antistokes* are the return variables. They need to be allocated
-		 *	before being passed to this function. 
-		 * 
-		 * \ingroup pipeline
-		 */
-		void pipeline_sum_and_fit (uint16_t* cpu_raw_data, bool dynamic_recentering,
-			Fitted_Function* fitted_stokes, Fitted_Function* fitted_rayleigh, Fitted_Function* fitted_antistokes){
-			
-			//Sending new image to the GPU
-			update_GPUImage(cpu_raw_data, image);
+		/*
+            * Internal function
+            * is used by pipeline_sum_and_fit and
+            * pipeline_sum_and_fit_to_array
+            */
+        void pipeline_sum_and_fit_internal(uint16_t* cpu_raw_data,
+                                            bool dynamic_recentering) {
+            // Sending new image to the GPU
+            update_GPUImage(cpu_raw_data, image);
 
-			//Creating summed up curves
-			switch (curve_extraction_context->interpolation)	
-			{
-			case LINEAR:
-				LaunchKernel::combine_peaks(curve_extraction_context, image->texture, image->size,
-					gpu_peak_numbers, gpu_frq_lut, gpu_start_ROI, gpu_end_ROI, gpu_summed_curv_buf);
-				break;
-			case SPLINE:
-				LaunchKernel::combine_peaks_spline(curve_extraction_context, image->texture, image->size,
-					gpu_peak_numbers, gpu_frq_lut, gpu_start_ROI, gpu_end_ROI, gpu_summed_curv_buf, gpu_spline_buffers);
-				break;
-			default: //nothing - could be a good idea to throw an error, or to return with nothing 
-				break;
-			}
+            // Creating summed up curves
+            switch (curve_extraction_context->interpolation) {
+            case LINEAR:
+                LaunchKernel::combine_peaks(
+                    curve_extraction_context, image->texture, image->size,
+                    gpu_peak_numbers, gpu_frq_lut, gpu_start_ROI,
+                    gpu_end_ROI, gpu_summed_curv_buf);
+                break;
+            case SPLINE:
+                LaunchKernel::combine_peaks_spline(
+                    curve_extraction_context, image->texture, image->size,
+                    gpu_peak_numbers, gpu_frq_lut, gpu_start_ROI,
+                    gpu_end_ROI, gpu_summed_curv_buf, gpu_spline_buffers);
+                break;
+            default:  // nothing - could be a good idea to throw an
+                        // error, or to return with nothing
+                break;
+            }
 
-			LaunchKernel::estimate_noise_signal(curve_extraction_context, image->size.width, gpu_summed_curv_buf, 
-				gpu_translation_lut, stokes->get_start_y(), antistokes->get_end_y(), gpu_error_deviation);
-			cudaDeviceSynchronize();
+            LaunchKernel::estimate_noise_signal(
+                curve_extraction_context, image->size.width,
+                gpu_summed_curv_buf, gpu_translation_lut,
+                stokes->get_start_y(), antistokes->get_end_y(),
+                gpu_error_deviation);
+            cudaDeviceSynchronize();
 
-			//Fitting the rayleigh peak
-			rayleigh->extract_data(gpu_summed_curv_buf, image->size.width, gpu_translation_lut, DEVICE);
-			rayleigh->get_initial_parameters();
-			if (rayleigh->use_fit_constraints())
-				rayleigh->determine_fitting_constraints();
-			rayleigh->fit();
-			rayleigh->sanity_check(gpu_error_deviation);
-			cudaDeviceSynchronize();
+            // Fitting the rayleigh peak
+            rayleigh->extract_data(gpu_summed_curv_buf, image->size.width,
+                                    gpu_translation_lut, DEVICE);
+            rayleigh->get_initial_parameters();
+            if (rayleigh->use_fit_constraints())
+            rayleigh->determine_fitting_constraints();
+            rayleigh->fit();
+            rayleigh->sanity_check(gpu_error_deviation);
+            cudaDeviceSynchronize();
 
-			//Extracting data of Stokes and antistokes peak (taking into account recentering)
-			if(dynamic_recentering){
-				stokes->extract_recentered_data(gpu_summed_curv_buf, image->size.width, gpu_translation_lut, DEVICE, rayleigh);
-				antistokes->extract_recentered_data(gpu_summed_curv_buf, image->size.width, gpu_translation_lut, DEVICE, rayleigh);
-			} else {
-				stokes->extract_data(gpu_summed_curv_buf, image->size.width, gpu_translation_lut, DEVICE);
-				antistokes->extract_data(gpu_summed_curv_buf, image->size.width, gpu_translation_lut, DEVICE);
-			}
+            // Extracting data of Stokes and antistokes peak (taking into
+            // account recentering)
+            if (dynamic_recentering) {
+            stokes->extract_recentered_data(
+                gpu_summed_curv_buf, image->size.width,
+                gpu_translation_lut, DEVICE, rayleigh);
+            antistokes->extract_recentered_data(
+                gpu_summed_curv_buf, image->size.width,
+                gpu_translation_lut, DEVICE, rayleigh);
+            } else {
+            stokes->extract_data(gpu_summed_curv_buf, image->size.width,
+                                    gpu_translation_lut, DEVICE);
+            antistokes->extract_data(gpu_summed_curv_buf,
+                                        image->size.width,
+                                        gpu_translation_lut, DEVICE);
+            }
 
-			//Fitting the antistokes peak
-			stokes->get_initial_parameters();
-			if (stokes->use_fit_constraints())
-				stokes->determine_fitting_constraints();
-			stokes->fit();
-			stokes->sanity_check(gpu_error_deviation);
-			
-			cudaDeviceSynchronize();
+            // Fitting the antistokes peak
+            stokes->get_initial_parameters();
+            if (stokes->use_fit_constraints())
+            stokes->determine_fitting_constraints();
+            stokes->fit();
+            stokes->sanity_check(gpu_error_deviation);
 
-			//Fitting the stokes peak
-			antistokes->get_initial_parameters();
-			if (antistokes->use_fit_constraints())
-				antistokes->determine_fitting_constraints();
-			antistokes->fit();
-			antistokes->sanity_check(gpu_error_deviation);
-			
-			cudaDeviceSynchronize();
-			
+            cudaDeviceSynchronize();
 
-			//Return the results
-			rayleigh->export_fitted_parameters(fitted_rayleigh->amplitude, fitted_rayleigh->shift, fitted_rayleigh->width, fitted_rayleigh->offset);
-			rayleigh->export_sanity(fitted_rayleigh->sanity);			
-			stokes->export_fitted_parameters(fitted_stokes->amplitude, fitted_stokes->shift, fitted_stokes->width, fitted_stokes->offset);
-			stokes->export_sanity(fitted_stokes->sanity);
-			antistokes->export_fitted_parameters(fitted_antistokes->amplitude, fitted_antistokes->shift, fitted_antistokes->width, fitted_antistokes->offset);
-			antistokes->export_sanity(fitted_antistokes->sanity);
+            // Fitting the stokes peak
+            antistokes->get_initial_parameters();
+            if (antistokes->use_fit_constraints())
+            antistokes->determine_fitting_constraints();
+            antistokes->fit();
+            antistokes->sanity_check(gpu_error_deviation);
 
-		}
+            cudaDeviceSynchronize();
+        }
+
+        /**
+            * The main function to call. Once the gpu buffers are
+            *initialized and full, you can call this to fit the stokes,
+            *rayleigh and antistokes peaks. You get the parameters for the
+            *functions as a result.
+            *
+            * \param[in] cpu_raw_data The image which is going to be used
+            *as basis for the fitting. dimension : width*height \param[in]
+            *dynamic_recentering Boolean to choose whether to automatically
+            *recenter the x-axis of the curve or not. If *true*, the fitted
+            *center of the rayleigh peak is used to shift the stokes peak
+            *and the antistokes peak (x -= rayleigh_x0). This is done
+            *before the data extraction, so it may affect the frequency
+            *range choosen. If *false*, the x-axis of the peaks aren't
+            *changed. *For the moment, please use False* \param[out]
+            *fitted_stokes A structure containing the fitted parameters for
+            *each fit of the Stokes peak. \param[out] fitted_rayleigh A
+            *structure containing the fitted parameters for each fit of the
+            *Rayleigh peak. \param[out] fitted_antistokes A structure
+            *containing the fitted parameters for each fit of the
+            *antiStokes peak.
+            *
+            * \returns
+            *	*fitted_stokes*, *fitted_rayleigh* and
+            **fitted_antistokes* are the return variables. They need to be
+            *allocated before being passed to this function.
+            *
+            * \ingroup pipeline
+            */
+        void pipeline_sum_and_fit(uint16_t* cpu_raw_data,
+                                    bool dynamic_recentering,
+                                    Fitted_Function* fitted_stokes,
+                                    Fitted_Function* fitted_rayleigh,
+                                    Fitted_Function* fitted_antistokes) {
+            // Process the image
+            pipeline_sum_and_fit_internal(cpu_raw_data,
+                                        dynamic_recentering);
+
+            // Return the results
+            rayleigh->export_fitted_parameters(
+                fitted_rayleigh->amplitude, fitted_rayleigh->shift,
+                fitted_rayleigh->width, fitted_rayleigh->offset);
+            rayleigh->export_sanity(fitted_rayleigh->sanity);
+
+            stokes->export_fitted_parameters(
+                fitted_stokes->amplitude, fitted_stokes->shift,
+                fitted_stokes->width, fitted_stokes->offset);
+            stokes->export_sanity(fitted_stokes->sanity);
+
+            antistokes->export_fitted_parameters(
+                fitted_antistokes->amplitude, fitted_antistokes->shift,
+                fitted_antistokes->width, fitted_antistokes->offset);
+            antistokes->export_sanity(fitted_antistokes->sanity);
+        }
+
+        /**
+            * The main function to call. Once the gpu buffers are
+            *initialized and full, you can call this to fit the stokes,
+            *rayleigh and antistokes peaks. You get the parameters for the
+            *functions as a result.
+            *
+            * \param[in] cpu_raw_data The image which is going to be used
+            *as basis for the fitting. dimension : width*height \param[in]
+            *dynamic_recentering Boolean to choose whether to automatically
+            *recenter the x-axis of the curve or not. If *true*, the fitted
+            *center of the rayleigh peak is used to shift the stokes peak
+            *and the antistokes peak (x -= rayleigh_x0). This is done
+            *before the data extraction, so it may affect the frequency
+            *range choosen. If *false*, the x-axis of the peaks aren't
+            *changed. *For the moment, please use False* \param[out]
+            *fit_stokes Array containt the result of the fit ([amplitude,
+            *shift, width, offset, amplitude, shift, width, offset, ...]).
+            *		dimension : 4*n_fits
+            * \param[out] fit_rayleigh Array containt the result of the fit
+            *([amplitude, shift, width, offset, amplitude, shift, width,
+            *offset, ...]). dimension : 4*n_fits \param[out] fit_antistokes
+            *Array containt the result of the fit ([amplitude, shift,
+            *width, offset, amplitude, shift, width, offset, ...]).
+            *		dimension : 4*n_fits
+            *
+            * \returns
+            *	*fit_stokes*, *fit_rayleigh* and *fit_antistokes* are
+            *the return variables. They need to be allocated before being
+            *passed to this function. \ingroup pipeline
+            */
+        void pipeline_sum_and_fit_to_array(uint16_t* cpu_raw_data,
+                                            bool dynamic_recentering,
+                                            float* fitted_stokes,
+                                            float* fitted_rayleigh,
+                                            float* fitted_antistokes) {
+            // Process the image
+            pipeline_sum_and_fit_internal(cpu_raw_data,
+                                        dynamic_recentering);
+
+            // Return the results - into pre-allocated arrays
+            rayleigh->export_fitted_parameters(fitted_rayleigh);
+            stokes->export_fitted_parameters(fitted_stokes);
+            antistokes->export_fitted_parameters(fitted_antistokes);
+        }
 
 		/**
 		 * Same function as pipeline_sum_and_fit except this version take measurements of each step of the algorithm is taking.

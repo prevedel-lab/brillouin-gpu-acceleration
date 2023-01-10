@@ -92,6 +92,12 @@ namespace DLL_wrapper{
 		DLL_EXPORT void pipeline_close();
 		DLL_EXPORT void pipeline_sum_and_fit(uint16_t* cpu_raw_data, bool dynamic_recentering,
 			Fitted_Function* stokes, Fitted_Function* rayleigh, Fitted_Function* antistokes);
+        DLL_EXPORT void pipeline_sum_and_fit_to_array(
+                    uint16_t* cpu_raw_data,
+                    bool dynamic_recentering,
+                    float* stokes,
+                    float* rayleigh,
+                    float* antistokes);
 		DLL_EXPORT void pipeline_sum_and_fit_timed(uint16_t* cpu_raw_data, bool dynamic_recentering,
 			Fitted_Function* stokes, Fitted_Function* rayleigh, Fitted_Function* antistokes, float* timings);
 		DLL_EXPORT void pipeline_get_gof(Goodness_Of_Fit* stokes_gof, Goodness_Of_Fit* rayleigh_gof, Goodness_Of_Fit* antistokes_gof);

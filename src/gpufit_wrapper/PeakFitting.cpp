@@ -346,6 +346,23 @@ void PeakFitting::export_fitted_parameters(float* amplitude, float* center, floa
 
 }
 
+
+/* Retrieves the fitted parameter, and split the parameters into 4 independent
+ * arrays.*
+ */
+void PeakFitting::export_fitted_parameters(float* fit) {
+  // TODO : add a Device-side method to copy the parameters into the right shape
+  if (storage == DEVICE) {  // GPU -> CPU
+    gpuErrchk(cudaMemcpy(fit, initial_parameters,
+                         sizeof(float) * n_fits * n_parameters,
+                         cudaMemcpyDeviceToHost));
+  } else {  // CPU -> CPU
+    gpuErrchk(cudaMemcpy(fit, initial_parameters,
+                         sizeof(float) * n_fits * n_parameters,
+                         cudaMemcpyHostToHost));
+  }
+}
+
 /* Retrieves parameter sanity from the fit
 */
 void PeakFitting::export_sanity(int* sanity)

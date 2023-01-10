@@ -109,7 +109,11 @@ public:
 	virtual void sanity_check(float* noise_level) = 0;
 	
 	// Export parameters
-	void export_fitted_parameters(float* amplitude, float* center, float * width, float* offset);
+        void export_fitted_parameters(float* amplitude,
+                                      float* center,
+                                      float* width,
+                                      float* offset);
+        void export_fitted_parameters(float* fit);
 	void export_sanity(int* sanity);
 
 	// Fitting constraints functions
