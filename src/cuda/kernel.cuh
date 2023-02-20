@@ -153,7 +153,6 @@ namespace Functions {
     /* Spline interpolation */
 
     __host__ __device__ void spline_coefficients(int points, float* x, float* y, float* a, float* b, float* c, float* d, Spline_Buffers spline_buffer, int buffer_offset);
-    __host__ __device__ void spline_coefficients_2(int points, float* x, float* y, float* a, float* b, float* c, float* d, Spline_Buffers spline_buffer, int buffer_offset);
 }
 
 namespace LaunchKernel {

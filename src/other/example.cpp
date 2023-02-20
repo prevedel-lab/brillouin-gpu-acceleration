@@ -464,7 +464,9 @@ void check_spline_fit() {
 	spline_buffer_2.h = new float[points];
 	spline_buffer_2.u = new float[points];
 	spline_buffer_2.z = new float[points];
-	Functions::spline_coefficients_2(points, x, y, a_2, b_2, c_2, d_2, spline_buffer_2, 0);
+
+	// New spline interplation to be tested
+	// Functions::spline_coefficients_2(points, x, y, a_2, b_2, c_2, d_2, spline_buffer_2, 0); 
 
 	// Comparing output values
 	printf("== a == \n");

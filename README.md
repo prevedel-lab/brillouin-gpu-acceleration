@@ -111,8 +111,7 @@ performance wanted, so we didn't pursuit them.
  Adrian Przybylski, Bj�rn Thiel, Jan Keller-Findeisen, Bernd Stock, and Mark Bates
  Scientific Reports, vol. 7, 15722 (2017); doi: https://doi.org/10.1038/s41598-017-15313-9
 *  Compute the quantile function for the normal distribution : Ported kmpm's code to C. https://gist.github.com/kmpm/1211922/
-*  Natural Cubic Spline Interpolation in C : used svdamami code onboth GPU and CPU. https://gist.github.com/svdamani/1015c5c4b673c3297309
-*  David Tschumperl�. The CImg Library. IPOL 2012 Meeting on Image Processing Libraries, Jun 2012,
+*  David Tschumperlé. The CImg Library. IPOL 2012 Meeting on Image Processing Libraries, Jun 2012,
 Cachan, France. 4 pp. hal-00927458 https://cimg.eu/index.html
 
 ## Contact
