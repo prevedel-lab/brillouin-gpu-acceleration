@@ -825,6 +825,51 @@ namespace Functions {
         //}
    
     }
+
+    __host__ __device__ void spline_coefficients_2(int points, float* x, float* y, float* a, float* b, float* c, float* d, Spline_Buffers spline_buffer, int buffer_offset)
+    {
+        // Numerical Analysis 9th ed - Burden, Faires (Ch. 3 Natural Cubic Spline, Pg. 149) 
+        // https://faculty.ksu.edu.sa/sites/default/files/numerical_analysis_9th.pdf (p.149)
+        // Using same names as in the reference
+        //
+        // Reference found thanks to this : https://gist.github.com/svdamani/1015c5c4b673c3297309
+
+        int n = points - 1;
+        float* alpha = spline_buffer.A + buffer_offset;
+        float* h = spline_buffer.h + buffer_offset;
+        float* l = spline_buffer.l + buffer_offset;
+        float* mu = spline_buffer.u + buffer_offset;
+        float* z = spline_buffer.z + buffer_offset;
+
+
+        for (int i = 0; i < n + 1; i++)
+            a[i] = y[i];
+
+        for (int i = 0; i < n; i++) {
+            h[i] = x[i + 1] - x[i];
+        }
+
+        for (int i = 1; i < n ; i++) {
+            alpha[i] = 3 / h[i] * (a[i + 1] - a[i]) - 3 / h[i - 1] * (a[i] - a[i - 1]);
+        }
+
+        // Solving tridiagonal linear system
+        l[0] = 1; mu[0] = 0; z[0] = 0;
+
+        for (int i = 1; i < n; i++) {
+            l[i] = 2 * (x[i + 1] - x[i - 1]) - h[i - 1] * mu[i - 1];
+            mu[i] = h[i] / l[i];
+            z[i] = (alpha[i] - h[i - 1] * z[i - 1]) / l[i];
+        }
+
+        l[n] = 1; z[n] = 0; c[n] = 0;
+
+        for (int i = n - 1; i >= 0; i--) {
+            c[i] = z[i] - mu[i] * c[i + 1];
+            b[i] = (a[i + 1] - a[i]) / h[i] - h[i] * (c[i + 1] + 2 * c[i]) / 3;
+            d[i] = (c[i + 1] - c[i]) / (3 * h[i]);
+        }
+    }
 }
 
 /* Functions to call from outside a Cuda code. Uses a default size of grid and block : if more performance is needed, this could be a start. */

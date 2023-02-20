@@ -9,6 +9,7 @@ void main() {
 	// Perform 2 test to check if GPUfit works
 	// Result gets displayed on the console
 	// ====
+	check_spline_fit();
 	check_poly2_fit(10, 500);
 	check_lorentzian_fit(10, 500);
 
@@ -427,6 +428,76 @@ void debug_splines() {
 	delete[] spline_buffer.z;
 
 	return;
+}
+
+void check_spline_fit() {
+	//Testing spline interpolation
+
+//Input
+	int const points = 10;
+	float x[points] = { -4,-3,-2,-1, 0, 1, 2, 3, 4 ,4.5 };
+	float y[points] = { 10, 5, 2, 8, 9 };
+
+	printf("data=[");
+	for (int i = 0; i < points; i++) {
+		//x[i] = rand() % 100;
+		y[i] = rand() % 100;
+		printf("%f %f \n", x[i], y[i]);
+	}
+	printf("]");
+
+	//Output
+	float a[points], b[points], c[points], d[points];
+	Spline_Buffers spline_buffer;
+	spline_buffer.A = new float[points];
+	spline_buffer.l = new float[points];
+	spline_buffer.h = new float[points];
+	spline_buffer.u = new float[points];
+	spline_buffer.z = new float[points];
+
+	Functions::spline_coefficients(points, x, y, a, b, c, d, spline_buffer, 0);
+
+	float a_2[points], b_2[points], c_2[points], d_2[points];
+	Spline_Buffers spline_buffer_2;
+	spline_buffer_2.A = new float[points];
+	spline_buffer_2.l = new float[points];
+	spline_buffer_2.h = new float[points];
+	spline_buffer_2.u = new float[points];
+	spline_buffer_2.z = new float[points];
+	Functions::spline_coefficients_2(points, x, y, a_2, b_2, c_2, d_2, spline_buffer_2, 0);
+
+	// Comparing output values
+	printf("== a == \n");
+	for (int i = 0; i < points; i++) {
+		printf(" %f | %f | %f\% \n ", a[i] , a_2[i], (a[i] - a_2[i]) / a[i] * 100);
+	}
+
+	printf("== b == \n");
+	for (int i = 0; i < points; i++) {
+		printf(" %f | %f | %f\% \n ", b[i], b_2[i], (b[i] - b_2[i]) / b[i] * 100);
+	}
+
+	printf("== c == \n");
+	for (int i = 0; i < points; i++) {
+		printf(" %f | %f | %f\% \n ", c[i], c_2[i], (c[i] - c_2[i]) / c[i] * 100);
+	}
+
+	printf("== d == \n");
+	for (int i = 0; i < points; i++) {
+		printf(" %f | %f | %f\% \n ", d[i], d_2[i], (d[i] - d_2[i]) / d[i] * 100);
+	}
+	
+	delete[] spline_buffer.A;
+	delete[] spline_buffer.l;
+	delete[] spline_buffer.h;
+	delete[] spline_buffer.u;
+	delete[] spline_buffer.z;
+
+	delete[] spline_buffer_2.A;
+	delete[] spline_buffer_2.l;
+	delete[] spline_buffer_2.h;
+	delete[] spline_buffer_2.u;
+	delete[] spline_buffer_2.z;
 }
 
 
