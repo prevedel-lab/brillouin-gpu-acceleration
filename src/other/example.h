@@ -27,3 +27,4 @@ void debug_splines();
 void check_poly2_fit(int n_fits, int n_points);
 void check_lorentzian_fit(int n_fits, int n_points);
 void check_spline_fit();
+void check_invNorm();

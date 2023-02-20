@@ -159,9 +159,11 @@
     <ClCompile Include="src\gpufit_wrapper\FunctionFitting.cpp" />
     <ClCompile Include="src\gpufit_wrapper\GPUFit_calls.cpp" />
     <ClCompile Include="src\gpufit_wrapper\PeakFitting.cpp" />
+    <ClCompile Include="src\other\asa241.cpp" />
     <ClCompile Include="src\other\SyntheticSignal.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\other\asa241.h" />
     <ClInclude Include="src\other\CImg.h" />
     <ClInclude Include="src\DLL_struct.h" />
     <ClInclude Include="src\other\example.h" />

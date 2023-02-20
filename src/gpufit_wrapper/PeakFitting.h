@@ -195,6 +195,7 @@ public:
 	// Create the angle distribution needed to compute a broadened Brillouin lineshape function
 	static void init_angle_distribution(float NA_illum, float NA_coll, float angle, int N, float* angle_distrib);
 	static double normsInv(double p, double mu, double sigma);
+	static double normsInv_2(double p, double mu, double sigma);
 
 	void apply_fitting_constraints(float min_amp, float max_amp, float min_shift, float max_shift);
 

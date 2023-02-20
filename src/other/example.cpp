@@ -9,6 +9,7 @@ void main() {
 	// Perform 2 test to check if GPUfit works
 	// Result gets displayed on the console
 	// ====
+	check_invNorm();
 	check_spline_fit();
 	check_poly2_fit(10, 500);
 	check_lorentzian_fit(10, 500);
@@ -626,6 +627,35 @@ void check_lorentzian_fit(int n_fits, int n_points) {
 		printf("gamma\t| %.1f\t| %.1f\t| %.4f %% \r\n", gamma[i], fitted_gamma[i], err_gamma * 100);
 		printf("center\t| %.1f\t| %.1f\t| %.4f %% \r\n", center[i], fitted_center[i], err_center * 100);
 		printf("offset\t| %.1f\t| %.1f\t| %.4f %% \r\n", offset[i], fitted_offset[i], err_offset * 100);
+	}
+
+}
+
+void check_invNorm() {
+
+	double p, mu, sigma;
+
+	double lower_bound = 0;
+	double upper_bound = 10000;
+
+	// for p
+	std::default_random_engine re;
+	std::uniform_real_distribution<double> rand_p(0, 1);	
+	std::uniform_real_distribution<double> rand_mu(-100, 100);
+	std::uniform_real_distribution<double> rand_sigma(0, 100);
+
+	printf("=== Testing normInv===== \n");
+	for (int n = 0; n < 100; n++) {
+
+		// drawing random values
+		p = rand_p(re);
+		mu = rand_mu(re);
+		sigma = rand_sigma(re);
+
+		double val = StokesOrAntiStokesFitting::normsInv(p, mu, sigma);
+		double val_2 = StokesOrAntiStokesFitting::normsInv_2(p, mu, sigma);
+		double rel_diff = (val - val_2) / val * 100;
+		printf("%f | %f | %f \n", val, val_2, rel_diff);
 	}
 
 }

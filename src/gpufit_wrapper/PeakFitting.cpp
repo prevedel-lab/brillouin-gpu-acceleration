@@ -913,3 +913,10 @@ double StokesOrAntiStokesFitting::normsInv(double p, double mu, double sigma)
 
     return mu + sigma * val;
 }
+
+#include "../other/asa241.h"
+double StokesOrAntiStokesFitting::normsInv_2(double p, double mu, double sigma)
+{
+
+    return mu + sigma * r8_normal_01_cdf_inverse(p);
+}
