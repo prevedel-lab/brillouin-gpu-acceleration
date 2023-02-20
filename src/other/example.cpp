@@ -645,7 +645,7 @@ void check_invNorm() {
 	std::uniform_real_distribution<double> rand_sigma(0, 100);
 
 	printf("=== Testing normInv===== \n");
-	for (int n = 0; n < 100; n++) {
+	for (int n = 0; n < 1000; n++) {
 
 		// drawing random values
 		p = rand_p(re);
@@ -656,6 +656,8 @@ void check_invNorm() {
 		double val_2 = StokesOrAntiStokesFitting::normsInv_2(p, mu, sigma);
 		double rel_diff = (val - val_2) / val * 100;
 		printf("%f | %f | %f \n", val, val_2, rel_diff);
+		if (rel_diff > 1)
+			printf("ERROR");
 	}
 
 }
