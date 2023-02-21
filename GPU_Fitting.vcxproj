@@ -189,6 +189,9 @@
     <Library Include="lib\gpufit\Debug\Gpufit.lib" />
     <Library Include="lib\gpufit\Release\Gpufit.lib" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="COPYING.txt" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
     <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 11.5.targets" />
