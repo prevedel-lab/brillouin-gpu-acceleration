@@ -25,8 +25,6 @@ void main() {
 	// Perform 2 test to check if GPUfit works
 	// Result gets displayed on the console
 	// ====
-	check_invNorm();
-	check_spline_fit();
 	check_poly2_fit(10, 500);
 	check_lorentzian_fit(10, 500);
 
@@ -647,6 +645,9 @@ void check_lorentzian_fit(int n_fits, int n_points) {
 
 }
 
+/*
+* Comparing new normInv implementation
+*/
 void check_invNorm() {
 
 	double p, mu, sigma;
@@ -667,9 +668,9 @@ void check_invNorm() {
 		p = rand_p(re);
 		mu = rand_mu(re);
 		sigma = rand_sigma(re);
-
-		double val = StokesOrAntiStokesFitting::normsInv(p, mu, sigma);
-		double val_2 = StokesOrAntiStokesFitting::normsInv_2(p, mu, sigma);
+		double val, val_2;
+		val = StokesOrAntiStokesFitting::normsInv(p, mu, sigma); // Old normInv
+ 		//val_2 = StokesOrAntiStokesFitting::normsInv_2(p, mu, sigma);  // New normInv
 		double rel_diff = (val - val_2) / val * 100;
 		printf("%f | %f | %f \n", val, val_2, rel_diff);
 		if (rel_diff > 1)
