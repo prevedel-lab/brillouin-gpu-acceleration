@@ -13,12 +13,12 @@ On a Nvidia GeForce 1050 Ti, a speedup of about 1000 was measured :
 the processing of an image (~300 lines fitted) took ~10ms. 
 
 For more information about the scientific aspect, see the publication :  
-	High-resolution line-scan Brillouin microscopy for live-imaging of 
-	mechanical properties during embryo development
-	Carlo Bevilacqua, Juan Manuel Gomez, Ulla-Maj Fiuza, 
-	Chii Jou Chan, Ling Wang, Sebastian Hambura, Manuel Eguren, Jan Ellenberg, 
-	Alba Diz-Muñoz, Maria Leptin, Robert Prevedel  
-	bioRxiv 2022.04.25.489364; doi: https://doi.org/10.1101/2022.04.25.489364 
+> High-resolution line-scan Brillouin microscopy for live-imaging of 
+> mechanical properties during embryo development
+> Carlo Bevilacqua, Juan Manuel Gomez, Ulla-Maj Fiuza, 
+> Chii Jou Chan, Ling Wang, Sebastian Hambura, Manuel Eguren, Jan Ellenberg, 
+> Alba Diz-Muñoz, Maria Leptin, Robert Prevedel  
+> bioRxiv 2022.04.25.489364; doi: https://doi.org/10.1101/2022.04.25.489364 
 
 For more information about the code, you can look into example.cpp and DLL_wrapper.cpp. A documentation can 
 also be created by using doxygen.
@@ -115,12 +115,14 @@ performance wanted, so we didn't pursuit them.
 
 ## Used code
 
-* GpuFit : Gpufit: An open-source toolkit for GPU-accelerated curve fitting
- Adrian Przybylski, Bj�rn Thiel, Jan Keller-Findeisen, Bernd Stock, and Mark Bates
- Scientific Reports, vol. 7, 15722 (2017); doi: https://doi.org/10.1038/s41598-017-15313-9
-* ASA241 (normInv): https://people.math.sc.edu/Burkardt/cpp_src/asa241/asa241.html
-* David Tschumperlé. The CImg Library. IPOL 2012 Meeting on Image Processing Libraries, Jun 2012,
-Cachan, France. 4 pp. hal-00927458 https://cimg.eu/index.html
+> GpuFit : Gpufit: An open-source toolkit for GPU-accelerated curve fitting
+> Adrian Przybylski, Björn Thiel, Jan Keller-Findeisen, Bernd Stock, and Mark Bates
+> Scientific Reports, vol. 7, 15722 (2017); doi: https://doi.org/10.1038/s41598-017-15313-9
+
+> ASA241 (normInv): https://people.math.sc.edu/Burkardt/cpp_src/asa241/asa241.html
+
+> David Tschumperlé. The CImg Library. IPOL 2012 Meeting on Image Processing Libraries, Jun 2012,
+> Cachan, France. 4 pp. hal-00927458 https://cimg.eu/index.html
 
 ## Contact
 
