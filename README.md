@@ -2,17 +2,25 @@
 
 ## In short
 The aim of this library is to provide **GPU acceleration** to the data processing needed in Brillouin microscopy.
-The various fits are done on with [the Gpufit library](https://github.com/gpufit/Gpufit), to which custom function were added
-(Lorentzian, quadratic and broadened Brillouin lineshape functions). The initial CPU processing was done in Matlab 
-by **Carlo Bevilacqua**. He also worked on the physical microscope which provided the data we tested the code on.
+The various fits are done with the [Gpufit library](https://github.com/gpufit/Gpufit), to which custom functions were added
+(Lorentzian, quadratic polynomial and broadened Brillouin lineshape functions). 
+The initial CPU processing was done in Matlab by **Carlo Bevilacqua**. He also worked on the physical microscope
+which provided the data we tested the code on.
 The GPU code, the Gpufit wrapper and the rest of the code in this repository was made by **Sebastian Hambura**. 
 
 
-On a Nvidia GeForce 1050 Ti, a speedup of about 10^3 was measured :
+On a Nvidia GeForce 1050 Ti, a speedup of about 1000 was measured :
 the processing of an image (~300 lines fitted) took ~10ms. 
 
-* For more information about the scientific aspect, see the publication : [link to Carlo's paper]
-* For more information about the code, you can look into example.cpp and DLL_wrapper.cpp. A documentation can 
+For more information about the scientific aspect, see the publication :  
+	High-resolution line-scan Brillouin microscopy for live-imaging of 
+	mechanical properties during embryo development
+	Carlo Bevilacqua, Juan Manuel Gomez, Ulla-Maj Fiuza, 
+	Chii Jou Chan, Ling Wang, Sebastian Hambura, Manuel Eguren, Jan Ellenberg, 
+	Alba Diz-Muñoz, Maria Leptin, Robert Prevedel  
+	bioRxiv 2022.04.25.489364; doi: https://doi.org/10.1101/2022.04.25.489364 
+
+For more information about the code, you can look into example.cpp and DLL_wrapper.cpp. A documentation can 
 also be created by using doxygen.
 
 
@@ -96,9 +104,9 @@ and do a fit with Gpufit on that part.
 with the rayleigh position.
 * Depending on the camera setup, but also the conventions (e.g. Matlab vs C++), you might have to translate the input
 image to have the orientation expected from the code.
-* There is a stripe pattern appearing when the peaks get narrow. We explain that by the algorithm not beeing able
+* There is a stripe pattern appearing when the peaks get narrow. The probable cause is the algorithm not beeing able
  to discriminate between a high amplitude narrow signal, whose peak is between 2 pixels, and a lower amplitude broader signal. 
-This could be solved as we now the theoretical curvature of the signal, but it wasn't implemented for now.
+This could be solved as we know the theoretical curvature of the signal, but it wasn't implemented for now.
 * We sometime faced incompatibilities between the compilled .dll and the computer running the code. This was due to different cuda version on 
 the computer. We solved that issue by compiling the gpufit.dll on the computer with the newest cuda version, and keeping that recent version
 on the PC.
@@ -110,7 +118,7 @@ performance wanted, so we didn't pursuit them.
 * GpuFit : Gpufit: An open-source toolkit for GPU-accelerated curve fitting
  Adrian Przybylski, Bj�rn Thiel, Jan Keller-Findeisen, Bernd Stock, and Mark Bates
  Scientific Reports, vol. 7, 15722 (2017); doi: https://doi.org/10.1038/s41598-017-15313-9
-* ASA241 : https://people.math.sc.edu/Burkardt/cpp_src/asa241/asa241.html
+* ASA241 (normInv): https://people.math.sc.edu/Burkardt/cpp_src/asa241/asa241.html
 * David Tschumperlé. The CImg Library. IPOL 2012 Meeting on Image Processing Libraries, Jun 2012,
 Cachan, France. 4 pp. hal-00927458 https://cimg.eu/index.html
 
