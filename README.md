@@ -14,7 +14,7 @@ the processing of an image (~300 lines fitted) took ~10ms.
 
 For more information about the scientific aspect, see the publication :  
 > High-resolution line-scan Brillouin microscopy for live-imaging of 
-> mechanical properties during embryo development
+> mechanical properties during embryo development  
 > Carlo Bevilacqua, Juan Manuel Gomez, Ulla-Maj Fiuza, 
 > Chii Jou Chan, Ling Wang, Sebastian Hambura, Manuel Eguren, Jan Ellenberg, 
 > Alba Diz-Muñoz, Maria Leptin, Robert Prevedel  
