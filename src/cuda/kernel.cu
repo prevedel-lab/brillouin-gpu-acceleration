@@ -1,4 +1,18 @@
-
+/* Copyright (C) 2020  Sebastian Hambura
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 
 
 #include "kernel.cuh"
@@ -737,8 +751,8 @@ namespace Functions {
 
     /**
      * Numerical Analysis 9th ed - Burden, Faires (Ch. 3 Natural Cubic Spline, Pg. 149) 
-     * Heavely inspired from this code :
-     * https://gist.github.com/svdamani/1015c5c4b673c3297309 : svdamani
+     * https://faculty.ksu.edu.sa/sites/default/files/numerical_analysis_9th.pdf (p.149)
+     *  Reference found thanks to this : https://gist.github.com/svdamani/1015c5c4b673c3297309
      * 
      * \param points (= n + 1)
      * \param x x[0] to x[points]
@@ -751,79 +765,42 @@ namespace Functions {
      */
     __host__ __device__ void spline_coefficients(int points, float* x, float* y, float* a, float* b, float* c, float* d, Spline_Buffers spline_buffer, int buffer_offset)
     {
-        int debug = 48200;
-        /** Step 0 */
-        int i, j;
+        // Using same names as in the reference
         int n = points - 1;
-
-        //Allocating x and y
-        for (i = 0; i < n + 1; i++){
-            a[i] = y[i] ;
-        }
-        //float* x = x;
-
-        // Memory allocation was done before : we only need to use the buffer.
-        float* h, *A, *l, *u, *z;
-        /** Minimum memory requirement *
-        h = (float*) malloc(sizeof(float)*n);
-        A = (float*) malloc(sizeof(float)*n);
-        l = (float*) malloc(sizeof(float)*(n + 1));
-        u = (float*) malloc(sizeof(float)*(n + 1));
-        z = (float*) malloc(sizeof(float)*(n + 1));
-        /**/
-
-        h = spline_buffer.h + buffer_offset;
-        A = spline_buffer.A + buffer_offset;
-        l = spline_buffer.l + buffer_offset;
-        u = spline_buffer.u + buffer_offset;
-        z = spline_buffer.z + buffer_offset;
-
-        //Allocating coefficient arrays
-        //float* a, * b, *c, * d;
-        //a = new float[n + 1];
-        //b = new float[n];
-        //c = new float[n + 1];
-        //d = new float[n];
+        float* alpha = spline_buffer.A + buffer_offset;
+        float* h = spline_buffer.h + buffer_offset;
+        float* l = spline_buffer.l + buffer_offset;
+        float* mu = spline_buffer.u + buffer_offset;
+        float* z = spline_buffer.z + buffer_offset;
 
 
-        /** Step 1 */
-        for (i = 0; i <= n - 1; ++i) h[i] = x[i + 1] - x[i];
+        for (int i = 0; i < n + 1; i++)
+            a[i] = y[i];
 
-        /** Step 2 */
-        for (i = 1; i <= n - 1; ++i)
-            A[i] = 3 * (a[i + 1] - a[i]) / h[i] - 3 * (a[i] - a[i - 1]) / h[i - 1];
-
-        /** Step 3 */
-        l[0] = 1;
-        u[0] = 0;
-        z[0] = 0;
-
-        /** Step 4 */
-        for (i = 1; i <= n - 1; ++i) {
-            l[i] = 2 * (x[i + 1] - x[i - 1]) - h[i - 1] * u[i - 1];
-            u[i] = h[i] / l[i];
-            z[i] = (A[i] - h[i - 1] * z[i - 1]) / l[i];
+        for (int i = 0; i < n; i++) {
+            h[i] = x[i + 1] - x[i];
         }
 
-        /** Step 5 */
-        l[n] = 1;
-        z[n] = 0;
-        c[n] = 0;
-
-        /** Step 6 */
-        for (j = n - 1; j >= 0; --j) {
-            c[j] = z[j] - u[j] * c[j + 1];
-            b[j] = (a[j + 1] - a[j]) / h[j] - h[j] * (c[j + 1] + 2 * c[j]) / 3;
-            d[j] = (c[j + 1] - c[j]) / (3 * h[j]);
+        for (int i = 1; i < n ; i++) {
+            alpha[i] = 3 / h[i] * (a[i + 1] - a[i]) - 3 / h[i - 1] * (a[i] - a[i - 1]);
         }
 
-        /** Step 7 */
-        //if (buffer_offset == debug) {
-        //    printf("%2s %8s %8s %8s %8s\n", "i", "ai", "bi", "ci", "di");
-        //    for (i = 0; i < n; ++i)
-        //        printf("%2d %8.2f %8.2f %8.2f %8.2f\n", i, a[i], b[i], c[i], d[i]);
-        //}
-   
+        // Solving tridiagonal linear system
+        l[0] = 1; mu[0] = 0; z[0] = 0;
+
+        for (int i = 1; i < n; i++) {
+            l[i] = 2 * (x[i + 1] - x[i - 1]) - h[i - 1] * mu[i - 1];
+            mu[i] = h[i] / l[i];
+            z[i] = (alpha[i] - h[i - 1] * z[i - 1]) / l[i];
+        }
+
+        l[n] = 1; z[n] = 0; c[n] = 0;
+
+        for (int i = n - 1; i >= 0; i--) {
+            c[i] = z[i] - mu[i] * c[i + 1];
+            b[i] = (a[i + 1] - a[i]) / h[i] - h[i] * (c[i + 1] + 2 * c[i]) / 3;
+            d[i] = (c[i + 1] - c[i]) / (3 * h[i]);
+        }
     }
 }
 

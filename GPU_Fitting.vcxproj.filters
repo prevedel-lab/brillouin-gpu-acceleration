@@ -17,6 +17,7 @@
     <ClCompile Include="src\other\example.cpp">
       <Filter>Examples</Filter>
     </ClCompile>
+    <ClCompile Include="src\other\asa241.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\DLL_wrapper.h" />
@@ -54,6 +55,7 @@
     <ClInclude Include="lib\gpufit\inc\definitions.h">
       <Filter>HelperLibraries\gpufit</Filter>
     </ClInclude>
+    <ClInclude Include="src\other\asa241.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="doxygen">
@@ -104,5 +106,8 @@
     <Library Include="lib\gpufit\Release\Gpufit.lib">
       <Filter>HelperLibraries\gpufit</Filter>
     </Library>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="COPYING.txt" />
   </ItemGroup>
 </Project>

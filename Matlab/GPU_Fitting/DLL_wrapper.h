@@ -14,8 +14,6 @@
 	#include "kernel.cuh"
 	#include "GPUFit_calls.h"
 	#include "FunctionFitting.h"
-	#include "CImg.h"
-	#include "tinydir.h" //New, to parse data and debug
 	#include "SyntheticSignal.h"
 #endif // DLL_COMPILATION
 

@@ -1,3 +1,19 @@
+/* Copyright (C) 2022  Sebastian Hambura
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 #include "example.h"
 
 
@@ -429,6 +445,78 @@ void debug_splines() {
 	return;
 }
 
+void check_spline_fit() {
+	//Testing spline interpolation
+
+//Input
+	int const points = 10;
+	float x[points] = { -4,-3,-2,-1, 0, 1, 2, 3, 4 ,4.5 };
+	float y[points] = { 10, 5, 2, 8, 9 };
+
+	printf("data=[");
+	for (int i = 0; i < points; i++) {
+		//x[i] = rand() % 100;
+		y[i] = rand() % 100;
+		printf("%f %f \n", x[i], y[i]);
+	}
+	printf("]");
+
+	//Output
+	float a[points], b[points], c[points], d[points];
+	Spline_Buffers spline_buffer;
+	spline_buffer.A = new float[points];
+	spline_buffer.l = new float[points];
+	spline_buffer.h = new float[points];
+	spline_buffer.u = new float[points];
+	spline_buffer.z = new float[points];
+
+	Functions::spline_coefficients(points, x, y, a, b, c, d, spline_buffer, 0);
+
+	float a_2[points], b_2[points], c_2[points], d_2[points];
+	Spline_Buffers spline_buffer_2;
+	spline_buffer_2.A = new float[points];
+	spline_buffer_2.l = new float[points];
+	spline_buffer_2.h = new float[points];
+	spline_buffer_2.u = new float[points];
+	spline_buffer_2.z = new float[points];
+
+	// New spline interplation to be tested
+	// Functions::spline_coefficients_2(points, x, y, a_2, b_2, c_2, d_2, spline_buffer_2, 0); 
+
+	// Comparing output values
+	printf("== a == \n");
+	for (int i = 0; i < points; i++) {
+		printf(" %f | %f | %f\% \n ", a[i] , a_2[i], (a[i] - a_2[i]) / a[i] * 100);
+	}
+
+	printf("== b == \n");
+	for (int i = 0; i < points; i++) {
+		printf(" %f | %f | %f\% \n ", b[i], b_2[i], (b[i] - b_2[i]) / b[i] * 100);
+	}
+
+	printf("== c == \n");
+	for (int i = 0; i < points; i++) {
+		printf(" %f | %f | %f\% \n ", c[i], c_2[i], (c[i] - c_2[i]) / c[i] * 100);
+	}
+
+	printf("== d == \n");
+	for (int i = 0; i < points; i++) {
+		printf(" %f | %f | %f\% \n ", d[i], d_2[i], (d[i] - d_2[i]) / d[i] * 100);
+	}
+	
+	delete[] spline_buffer.A;
+	delete[] spline_buffer.l;
+	delete[] spline_buffer.h;
+	delete[] spline_buffer.u;
+	delete[] spline_buffer.z;
+
+	delete[] spline_buffer_2.A;
+	delete[] spline_buffer_2.l;
+	delete[] spline_buffer_2.h;
+	delete[] spline_buffer_2.u;
+	delete[] spline_buffer_2.z;
+}
+
 
 /**
 Testing if the fit of 2nd degree polynomials  using GPUfit works or not.
@@ -553,6 +641,40 @@ void check_lorentzian_fit(int n_fits, int n_points) {
 		printf("gamma\t| %.1f\t| %.1f\t| %.4f %% \r\n", gamma[i], fitted_gamma[i], err_gamma * 100);
 		printf("center\t| %.1f\t| %.1f\t| %.4f %% \r\n", center[i], fitted_center[i], err_center * 100);
 		printf("offset\t| %.1f\t| %.1f\t| %.4f %% \r\n", offset[i], fitted_offset[i], err_offset * 100);
+	}
+
+}
+
+/*
+* Comparing new normInv implementation
+*/
+void check_invNorm() {
+
+	double p, mu, sigma;
+
+	double lower_bound = 0;
+	double upper_bound = 10000;
+
+	// for p
+	std::default_random_engine re;
+	std::uniform_real_distribution<double> rand_p(0, 1);	
+	std::uniform_real_distribution<double> rand_mu(-100, 100);
+	std::uniform_real_distribution<double> rand_sigma(0, 100);
+
+	printf("=== Testing normInv===== \n");
+	for (int n = 0; n < 1000; n++) {
+
+		// drawing random values
+		p = rand_p(re);
+		mu = rand_mu(re);
+		sigma = rand_sigma(re);
+		double val, val_2;
+		val = StokesOrAntiStokesFitting::normsInv(p, mu, sigma); // Old normInv
+ 		//val_2 = StokesOrAntiStokesFitting::normsInv_2(p, mu, sigma);  // New normInv
+		double rel_diff = (val - val_2) / val * 100;
+		printf("%f | %f | %f \n", val, val_2, rel_diff);
+		if (rel_diff > 1)
+			printf("ERROR");
 	}
 
 }
